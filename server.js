@@ -266,7 +266,7 @@ async function collectPlayers() {
   await new Promise((r) => setTimeout(r, 900));
   // Read the console straight from the tmux pane, fast and clean, unlike
   // `docker logs --tail` which gets slow once the json log grows large.
-  const { err, out } = await run('docker', ['exec', CONTAINER, 'tmux', 'capture-pane', '-p', '-S', '-60']);
+  const { err, out } = await run('docker', ['exec', CONTAINER, 'tmux', 'capture-pane', '-pt', '0']);
   if (err) return;
   // Player chat reaches this console and can hold line breaks, so a connected player
   // can print a fake `playing` reply. The mod reads Main.player directly: trust it
