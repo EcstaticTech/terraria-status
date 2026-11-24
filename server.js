@@ -21,61 +21,78 @@ const { parsePlaying, NAME_MAX } = require('./console-players');
 const { sanitizeModBosses, pickLive } = require('./world-extras');
 const { parseEvents, recentKills } = require('./fight-events');
 const { createFeed } = require('./discord-feed');
-const askLib = require('./ask');
 
-// ---- deploy config (override via environment; defaults match bobagi.space) --
+// ---- deploy config (override via environment; defaults match test server) --
 const PORT = parseInt(process.env.STATUS_PORT || '3063', 10);
 const HOST = process.env.STATUS_BIND || '127.0.0.1'; // keep localhost; expose via reverse proxy
 // Public origin, used by robots.txt / sitemap.xml (SEO). Override when self-hosting.
-const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://terraria.bobagi.space').replace(/\/+$/, '');
+const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://terraria.ronlab.site').replace(/\/+$/, '');
 const CONTAINER = process.env.TMOD_CONTAINER || 'tmodloader';
-const DATA_DIR = process.env.TMOD_DATA_DIR || '/opt/terraria-tmodloader/data/tModLoader';
-const WORLD_NAME = process.env.TMOD_WORLD || 'Hyperborea';
+const DATA_DIR = process.env.TMOD_DATA_DIR || (process.platform === 'win32' ? 'C:\\docker\\tModLoader\\data\\tModLoader' : '/opt/terraria-tmodloader/data/tModLoader');
+const WORLD_NAME = process.env.TMOD_WORLD || 'TestWorld';
 const WORLD_FILE = path.join(DATA_DIR, 'Worlds', WORLD_NAME + '.wld');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 // Optional: written by the companion server-side mod (see optional-serverside-mod/).
 // If present & fresh, per-player character stats appear in the site's player modal.
 const STATS_FILE = process.env.TMOD_STATS_FILE || path.join(DATA_DIR, 'playerstats.json');
-// The world password (TMOD_PASS=... in the tmodloader .env) gates the day/night
+// The world password (TMOD_PASS=... in docker-compose.yml or .env) gates the day/night
 // button: players already have it to join. Read server-side only, never sent out.
-// No file or no TMOD_PASS = the button is off.
-const PASS_FILE = process.env.TMOD_PASS_FILE || path.join(DATA_DIR, '..', '..', '.env');
+const PASS_FILE = process.env.TMOD_PASS_FILE || (
+  process.platform === 'win32'
+    ? path.join(DATA_DIR, '..', '..', 'docker-compose.yml')
+    : path.join(DATA_DIR, '..', '..', '.env')
+);
 // The mod rewrites the file every ~3 s while anyone is online. Newer than this, it
 // is the live truth about who is connected.
 const STATS_FRESH_MS = 15000;
 // Boss fights, invasions and deaths, one JSON line each, written by the same mod
 // (BossFights.cs). Feeds the Discord webhook and /api/fights.
 const EVENTS_FILE = process.env.TMOD_EVENTS_FILE || path.join(DATA_DIR, 'serverevents.jsonl');
+const ENABLED_MODS_FILE = path.join(DATA_DIR, 'Mods', 'enabled.json');
 
-// ---- static, subject-known metadata --------------------------------------
-const MODS = [
-  { id: '2619954303', name: 'Recipe Browser',   rarity: 'blue',   desc: 'Busque qualquer receita e veja onde cada item é usado para criar.' },
-  { id: '2563309347', name: 'Magic Storage',    rarity: 'purple', desc: 'Um baú central em rede: deposite, pesquise e crie direto do estoque.' },
-  { id: '2669644269', name: 'Boss Checklist',   rarity: 'orange', desc: 'Checklist de progressão: bosses, ordem, drops e itens de invocação.' },
-  { id: '2687866031', name: 'Census',           rarity: 'green',  desc: 'Checklist de NPCs: mostra o que cada morador precisa para aparecer.' },
-  { id: '2599842771', name: 'AlchemistNPC Lite', rarity: 'lime',  desc: 'NPCs que vendem poções, buffs e viagem, puro quality-of-life.' },
-  { id: '2565639705', name: 'Ore Excavator',    rarity: 'yellow', desc: 'Vein-mine: quebre um filão de minério ou uma árvore inteira num golpe.' },
-  { id: '2908170107', name: 'SerousCommonLib',  rarity: 'gray',   desc: 'Biblioteca de suporte: o Magic Storage precisa dela (instala junto).' },
-  { id: '3021379176', name: 'Steam Achievement Fix', rarity: 'cyan', desc: 'As conquistas que você desbloqueia aqui contam no seu perfil do Terraria na Steam, automático, o servidor já exige o mod.' },
-  { id: '2570931073', name: "Fargo's Mutant Mod", rarity: 'red', desc: 'Construção instantânea (Instabridge, InstaHouse, Instavator) e o NPC Mutant, que vende invocações de bosses.' },
-  { id: '2815540735', name: "Fargo's Souls Mod", rarity: 'purple', desc: 'Encantamentos, Souls e bosses novos. O Eternity Mode é opcional: só liga com o item Mutant\'s Gift.' },
-  { id: '3222493606', name: 'Luminance', rarity: 'gray', desc: 'Biblioteca de suporte: o Fargo\'s Souls precisa dela (instala junto).' },
-  { id: '2812377597', name: 'No Pylon Restrictions', rarity: 'cyan', desc: 'Permite mais de um Pylon de cada bioma, já que o mundo dobrou. O resto segue como no jogo normal: NPCs por perto, bioma certo e alcance.' },
-  // Our own mod, published on the Workshop (Bobagi/InfernoAura).
-  { id: '3834360329', name: 'Inferno Aura', rarity: 'orange',
-    desc: 'Feito para este servidor: troca o anel gigante da Poção do Inferno por uma aura de fogo em volta do personagem. Só muda o visual, o dano é o mesmo.' },
-];
+// ---- mod metadata catalogue ----------------------------------------------
+const KNOWN_MODS = {
+  'RecipeBrowser': { id: '2619954303', name: 'Recipe Browser', rarity: 'blue', desc: 'Browse recipes and see where items are used.' },
+  'MagicStorage': { id: '2563309347', name: 'Magic Storage', rarity: 'purple', desc: 'Centralized network storage: deposit, search, and craft directly.' },
+  'BossChecklist': { id: '2669644269', name: 'Boss Checklist', rarity: 'orange', desc: 'Progression checklist: bosses, order, drops, and summons.' },
+  'Census': { id: '2687866031', name: 'Census', rarity: 'green', desc: 'Town NPC checklist: requirements for each resident to spawn.' },
+  'AlchemistNPCLite': { id: '2599842771', name: 'AlchemistNPC Lite', rarity: 'lime', desc: 'NPCs selling potions, buffs, and teleports for quality of life.' },
+  'OreExcavator': { id: '2565639705', name: 'Ore Excavator', rarity: 'yellow', desc: 'Vein mining: mine an entire ore vein or tree in a single swing.' },
+  'SerousCommonLib': { id: '2908170107', name: 'SerousCommonLib', rarity: 'gray', desc: 'Support library required by Magic Storage.' },
+  'SteamAchievementFix': { id: '3021379176', name: 'Steam Achievement Fix', rarity: 'cyan', desc: 'Unlocks achievements on your Steam profile in multiplayer.' },
+  'Fargowiltas': { id: '2570931073', name: "Fargo's Mutant Mod", rarity: 'red', desc: 'Instant construction and the Mutant NPC who sells boss summons.' },
+  'FargowiltasSouls': { id: '2815540735', name: "Fargo's Souls Mod", rarity: 'purple', desc: 'New enchantments, souls, and optional Eternity Mode.' },
+  'Luminance': { id: '3222493606', name: 'Luminance', rarity: 'gray', desc: 'Support graphics library required by Fargo\'s Souls.' },
+  'NoPylonRestrictions': { id: '2812377597', name: 'No Pylon Restrictions', rarity: 'cyan', desc: 'Allows multiple pylons of each biome across larger worlds.' },
+  'InfernoAura': { id: '3834360329', name: 'Inferno Aura', rarity: 'orange', desc: 'Replaces the giant Inferno Potion ring with a stylish flame aura.' },
+  'StatusExport': { id: null, name: 'StatusExport', rarity: 'orange', desc: 'Server companion mod exporting live character, inventory, and world stats.' },
+};
+
+function getActiveMods() {
+  try {
+    if (fs.existsSync(ENABLED_MODS_FILE)) {
+      const list = JSON.parse(fs.readFileSync(ENABLED_MODS_FILE, 'utf8'));
+      if (Array.isArray(list) && list.length > 0) {
+        return list.map((modName) => {
+          if (KNOWN_MODS[modName]) return KNOWN_MODS[modName];
+          return { id: null, name: modName, rarity: 'blue', desc: 'Active server mod.' };
+        });
+      }
+    }
+  } catch (_) {}
+  return [];
+}
 
 const WORLD = {
   name: WORLD_NAME,
-  size: process.env.TMOD_WORLD_SIZE || 'Small',
+  size: process.env.TMOD_WORLD_SIZE || 'Medium',
   difficulty: process.env.TMOD_DIFFICULTY || 'Expert',
   maxPlayers: parseInt(process.env.TMOD_MAXPLAYERS || '8', 10),
 };
 
 const SERVER = {
-  host: process.env.SERVER_HOST || 'bobagi.space', // SEO/display only; players join by `ip` (domain is Cloudflare-proxied, HTTP only)
-  ip: process.env.SERVER_IP || '150.230.85.106',
+  host: process.env.SERVER_HOST || 'play.ronlab.site',
+  ip: process.env.SERVER_IP || 'play.ronlab.site',
   port: parseInt(process.env.SERVER_PORT || '7777', 10),
   passwordProtected: true,
   steamAppId: 1281930,         // tModLoader on Steam (steam://run/<id> opens it)
@@ -114,12 +131,10 @@ let snapshot = {
   players: { count: 0, max: WORLD.maxPlayers, list: [], statsSource: false, sampledAt: null },
   world: Object.assign({ lastSaveAt: null, live: null, progress: null, tiles: null }, WORLD),
   server: SERVER,
-  mods: MODS,
-  // "Pergunte ao Claude" box: on only when ASK_CLAUDE_BIN is set (see ask.js).
-  ask: { enabled: false, maxQuestions: askLib.MAX_QUESTIONS, questionMax: askLib.QUESTION_MAX },
+  mods: getActiveMods(),
 };
 
-// Last complete copy of the world, for the /mapa/ viewer (the browser parses it).
+// Last complete copy of the world, for the /map/ viewer (the browser parses it).
 let worldSnapshot = null; // { buf, etag, mtime }
 
 // name -> firstSeen epoch ms, so we can show "online for ~X" without a mod.
@@ -321,12 +336,37 @@ async function collectLatestVersion() {
   } catch (_) { /* keep last */ }
 }
 
+async function getDirSize(dir) {
+  let total = 0;
+  try {
+    const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        const sub = await getDirSize(fullPath);
+        if (sub !== null) total += sub;
+      } else if (entry.isFile()) {
+        const st = await fs.promises.stat(fullPath);
+        total += st.size;
+      }
+    }
+    return total;
+  } catch (_) {
+    return null;
+  }
+}
+
 async function collectDisk() {
-  const { err, out } = await run('du', ['-sb', path.join(DATA_DIR, 'Worlds')]);
+  const worldsDir = path.join(DATA_DIR, 'Worlds');
+  const { err, out } = await run('du', ['-sb', worldsDir]);
   if (!err) {
     const n = parseInt(out.split(/\s+/)[0], 10);
     if (!isNaN(n)) snapshot.resources.diskWorldBytes = n;
+  } else {
+    const n = await getDirSize(worldsDir);
+    if (n !== null) snapshot.resources.diskWorldBytes = n;
   }
+  snapshot.mods = getActiveMods();
   fs.stat(WORLD_FILE, (e, st) => { if (!e) snapshot.world.lastSaveAt = st.mtime.toISOString(); });
 }
 
@@ -447,8 +487,10 @@ const failsByIp = new Map(); // ip -> [timestamps]
 let lastTimeChange = 0;
 
 function worldPassword() {
+  if (process.env.TMOD_PASS) return process.env.TMOD_PASS;
   try {
-    const m = /^\s*TMOD_PASS\s*=\s*(.*)$/m.exec(fs.readFileSync(PASS_FILE, 'utf8'));
+    const content = fs.readFileSync(PASS_FILE, 'utf8');
+    const m = /^\s*(?:-\s*)?TMOD_PASS\s*[:=]\s*(.*)$/m.exec(content);
     const v = m ? m[1].trim().replace(/^(['"])(.*)\1$/, '$2') : '';
     return v || null;
   } catch (_) { return null; }
@@ -522,166 +564,8 @@ function handleTime(req, res) {
   });
 }
 
-// ---- "Pergunte ao Claude" ----------------------------------------------------
-// POST /api/ask {"password","question","conversationId"?} or {"password","close":id}. Same password gate as the
-// day/night button. The answer streams back as server-sent events:
-//   event: status {kind}   the model is thinking / searching / reading a page
-//   event: delta  {text}   a piece of the answer
-//   event: done   {conversationId, used, max, closed, text}
-//   event: error  {error}
-// The session has web search only, nothing that can reach this host (see ask.js).
-const ASK_HTTP = { curta: 400, longa: 400, ritmo: 429, ocupado: 429, fila: 429, orcamento: 429 };
-let asker = null, askRun = null;
-// Curated notes about this server's mods (ask-knowledge.md), appended to the system
-// prompt. Edit the file and restart to teach the analyst something new.
-function askKnowledge() {
-  try { return fs.readFileSync(path.join(__dirname, 'ask-knowledge.md'), 'utf8'); } catch (_) { return ''; }
-}
-
-function startAsk() {
-  const bin = process.env.ASK_CLAUDE_BIN;
-  if (!bin) return;
-  try { fs.accessSync(bin, fs.constants.X_OK); } catch (_) { console.log('ask: ASK_CLAUDE_BIN is not an executable, box disabled'); return; }
-  askRun = askLib.createCliRunner({ bin, cwd: ASK_ROOM });
-  const stale = askRun.forgetAll();   // conversations do not survive a restart: drop their transcripts
-  if (stale) console.log('ask: ' + stale + ' transcricao(oes) antiga(s) apagada(s)');
-  asker = askLib.createAsk({
-    run: askRun,
-    systemPrompt: askLib.buildSystemPrompt({ worldName: WORLD.name, worldSize: WORLD.size, difficulty: WORLD.difficulty, maxPlayers: WORLD.maxPlayers, mods: MODS, knowledge: askKnowledge() }),
-    stateFile: path.join(__dirname, 'state', 'ask-usage.json'),
-    sessionsFile: path.join(__dirname, 'state', 'ask-sessions.json'),
-    log: (line) => console.log('ask: ' + line),
-    limits: {
-      dailyUsd: parseFloat(process.env.ASK_DAILY_USD || '') || undefined,
-      monthlyUsd: parseFloat(process.env.ASK_MONTHLY_USD || '') || undefined,
-    },
-  });
-  asker.start();
-  // A restart or shutdown must not leave session processes behind.
-  for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { askRun.killAll(); process.exit(0); });
-  snapshot.ask.enabled = true;
-}
-
-// The snapshot's player stats are up to 25 s old (playerLoop). For a question the mod's
-// file is read again, so "what am I holding" matches what the player sees right now.
-function freshSnapshot() {
-  const mod = readModStats();
-  if (!mod) return snapshot;
-  const list = snapshot.players.list.map((p) => Object.assign({}, p, { stats: mod.byName[p.name] || p.stats }));
-  return Object.assign({}, snapshot, { players: Object.assign({}, snapshot.players, { list }) });
-}
-
-// ---- the analyst's data room ------------------------------------------------
-// Copies of game data written into the session's working directory before each
-// question, so the analyst reads the same facts the owner would look up. Nothing secret
-// goes in: no .env, no console log (it prints the password), no webhook, and every file
-// is scrubbed of the world password and of IP addresses on top of that.
-const ASK_ROOM = path.join(__dirname, 'state', 'ask-cwd');
-const MODS_DIR = path.join(DATA_DIR, 'Mods');
-const MODCONFIG_DIR = path.join(DATA_DIR, 'ModConfigs');
-function readTail(file, maxBytes) {
-  try {
-    const st = fs.statSync(file);
-    const from = Math.max(0, st.size - maxBytes);
-    const fd = fs.openSync(file, 'r');
-    try {
-      const buf = Buffer.alloc(st.size - from);
-      fs.readSync(fd, buf, 0, buf.length, from);
-      const text = buf.toString('utf8');
-      return from > 0 ? text.slice(text.indexOf('\n') + 1) : text;
-    } finally { fs.closeSync(fd); }
-  } catch (_) { return ''; }
-}
-function readSmall(file, maxBytes) {
-  try { return fs.statSync(file).size <= maxBytes ? fs.readFileSync(file, 'utf8') : ''; } catch (_) { return ''; }
-}
-function buildAskRoom() {
-  const scrub = askLib.scrubber([worldPassword()]);
-  const live = freshSnapshot();
-  const pretty = (v) => JSON.stringify(v, null, 1);
-  const files = {
-    'jogadores.json': pretty({ geradoEm: new Date().toISOString(), online: live.players.list.map((p) => Object.assign({ onlineHaSeg: p.onlineForSec }, p.stats || { name: p.name })) }),
-    'mundo.json': pretty({ servidorNoAr: live.online, mundo: live.world, tmodloader: live.server.tmodloaderVersion, terraria: live.server.terrariaVersion, noArHaSeg: live.container.uptimeSec }),
-    'mods.json': pretty({ ligados: (() => { try { return JSON.parse(readSmall(path.join(MODS_DIR, 'enabled.json'), 65536)); } catch (_) { return []; } })(), descricao: MODS }),
-    'lutas.jsonl': readTail(EVENTS_FILE, 400 * 1024),
-    'mortes.json': readSmall(path.join(DATA_DIR, 'playerdeaths.json'), 256 * 1024),
-    'notas.md': askKnowledge(),
-    'site.md': ASK_SITE_NOTES,
-  };
-  try {
-    for (const name of fs.readdirSync(MODCONFIG_DIR).filter((f) => /^[A-Za-z0-9_.-]+\.json$/.test(f)).slice(0, 30)) {
-      const text = readSmall(path.join(MODCONFIG_DIR, name), 128 * 1024);
-      if (text) files['config-' + name] = text;
-    }
-  } catch (_) { /* no mod configs */ }
-  for (const k of Object.keys(files)) { if (!files[k]) delete files[k]; else files[k] = scrub(files[k]); }
-  files['LEIA-ME.md'] = '# Dados do servidor (cópias somente leitura, refeitas a cada pergunta)\n\n'
-    + Object.keys(files).sort().map((k) => '- ' + k + ': ' + (ASK_ROOM_INDEX[k] || (k.startsWith('config-') ? 'configuração de um mod (nome do mod no nome do arquivo)' : 'dados do servidor'))).join('\n') + '\n';
-  askLib.writeDataRoom(ASK_ROOM, files);
-}
-const ASK_ROOM_INDEX = {
-  'jogadores.json': 'quem está online agora e tudo o que cada personagem carrega',
-  'mundo.json': 'progresso do mundo, bosses derrotados e que faltam, hora, eventos, versões',
-  'mods.json': 'mods ligados no servidor e o que cada um faz',
-  'lutas.jsonl': 'histórico de eventos, uma linha JSON cada: boss_kill e boss_wipe (dano por jogador, duração, mortes), death, invasões',
-  'mortes.json': 'total de mortes por jogador',
-  'notas.md': 'fatos já conferidos sobre os mods deste servidor',
-  'site.md': 'o que o site e o servidor oferecem, comandos do chat',
-};
-const ASK_SITE_NOTES = [
-  '# Site e servidor', '',
-  '- Site: terraria.bobagi.space. Mostra quem está online (clicar no nome abre os detalhes do personagem), CPU e memória, bosses derrotados, mods, o mapa do mundo em /mapa/ e um botão de dia/noite com a senha do servidor.',
-  '- Comandos do chat para jogadores: /ping, /playing, /roll, /p texto.',
-  '- Dar item, curar, teleportar e outros comandos de administração só existem no console do servidor, que só o dono (Gustavo) usa.',
-  '- O Discord do grupo recebe aviso de cada chefe derrotado com dano e DPS por jogador, e um ranking semanal.',
-  '- O servidor atualiza o tModLoader sozinho uma vez por dia.',
-].join('\n');
-
-function handleAsk(req, res) {
-  withPassword(req, res, 4096, async (data, ip) => {
-    if (!asker) return sendJson(res, 503, { error: 'desligado' });
-    // {"close": id}: the player started a new conversation, end the old session now.
-    if (typeof data.close === 'string') return sendJson(res, 200, { ok: true, closed: !!asker.close(data.close.slice(0, 64)) });
-    const abort = new AbortController();
-    let open = false;
-    const send = (event, obj) => { if (open && !res.writableEnded) res.write('event: ' + event + '\ndata: ' + JSON.stringify(obj) + '\n\n'); };
-    res.on('close', () => abort.abort());
-    // Headers go out on the first event, so a limit hit before the model runs is
-    // still a plain JSON error with its own status code.
-    const begin = () => {
-      if (open) return;
-      open = true;
-      res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store, no-transform', 'x-accel-buffering': 'no', 'x-content-type-options': 'nosniff' });
-    };
-    const started = Date.now();
-    try {
-      try { buildAskRoom(); } catch (_) { /* the analyst still answers from the prompt state */ }
-      const out = await asker.ask({
-        ip,
-        conversationId: typeof data.conversationId === 'string' ? data.conversationId.slice(0, 64) : null,
-        question: data.question,
-        serverState: askLib.buildServerState(freshSnapshot()),
-        signal: abort.signal,
-        onEvent: (ev) => { begin(); send(ev.type, ev.type === 'delta' ? { text: ev.text } : { kind: ev.kind }); },
-      });
-      begin();
-      // Never the question or the answer: only sizes and cost reach the log.
-      console.log(`ask: ok ${Math.round((Date.now() - started) / 1000)}s pergunta ${out.used}/${out.max} ~$${out.costUsd.toFixed(4)}`);
-      send('done', { conversationId: out.conversationId, used: out.used, max: out.max, closed: out.closed, text: out.text });
-      res.end();
-    } catch (e) {
-      const code = e instanceof askLib.AskError ? e.code : (abort.signal.aborted ? 'cancelado' : 'claude');
-      if (code !== 'cancelado' && !ASK_HTTP[code]) console.log('ask: falhou (' + code + ')');
-      if (!open) return sendJson(res, ASK_HTTP[code] || 502, Object.assign({ error: code }, e.extra));
-      send('error', Object.assign({ error: code }, e.extra));
-      res.end();
-    }
-  });
-}
-
 http.createServer((req, res) => {
   if (req.url === '/api/time') return handleTime(req, res);
-  if (req.url === '/api/ask') return handleAsk(req, res);
   if (req.url === '/api/status' || req.url.startsWith('/api/status?')) {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'access-control-allow-origin': '*' });
     return res.end(JSON.stringify(snapshot));
@@ -691,10 +575,12 @@ http.createServer((req, res) => {
     return res.end(fightsJson());
   }
   if (req.url === '/healthz') { res.writeHead(200); return res.end('ok'); }
-  if (req.url.split('?')[0] === '/mapa/mundo.wld') return serveWorld(req, res);
-  if (req.url === '/mapa') { res.writeHead(301, { location: '/mapa/' }); return res.end(); }
-  // SEO: página única, então sitemap e robots são estáticos e curtos.
-  // /api/ fora do índice (JSON, muda a cada poll, não é conteúdo de busca).
+  const reqPath = req.url.split('?')[0];
+  if (reqPath === '/map/mundo.wld' || reqPath === '/mapa/mundo.wld') return serveWorld(req, res);
+  if (req.url === '/map' || req.url === '/mapa') { res.writeHead(301, { location: '/map/' }); return res.end(); }
+  if (req.url === '/mapa/') { res.writeHead(301, { location: '/map/' }); return res.end(); }
+  // SEO: single page app, sitemap and robots are static.
+  // /api/ out of index.
   if (req.url === '/robots.txt') {
     res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
     return res.end(`User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${SITE_ORIGIN}/sitemap.xml\n`);
@@ -704,7 +590,7 @@ http.createServer((req, res) => {
     return res.end(
       '<?xml version="1.0" encoding="UTF-8"?>\n'
       + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-      + `  <url>\n    <loc>${SITE_ORIGIN}/mapa/</loc>\n    <changefreq>daily</changefreq>\n  </url>\n`
+      + `  <url>\n    <loc>${SITE_ORIGIN}/map/</loc>\n    <changefreq>daily</changefreq>\n  </url>\n`
       + `  <url>\n    <loc>${SITE_ORIGIN}/</loc>\n`
       + `    <lastmod>${new Date().toISOString().slice(0, 10)}</lastmod>\n`
       + '    <changefreq>hourly</changefreq>\n    <priority>1.0</priority>\n  </url>\n'
@@ -718,7 +604,6 @@ http.createServer((req, res) => {
   loadModBossIcons();
   fastLoop(); diskLoop(); worldLoop();
   feed.start();
-  startAsk();
   setTimeout(playerLoop, 3000); // let the first inspect land so `online` is known
 
 });

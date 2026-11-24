@@ -14,9 +14,9 @@
     var p=[];if(d)p.push(d+'d');if(h)p.push(h+'h');p.push(m+'m');return p.join(' ');
   }
   function fmtAgo(iso){
-    if(!iso)return 'agora';
+    if(!iso)return 'just now';
     var s=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/1000));
-    if(s<5)return 'agora';if(s<60)return 'há '+s+'s';var m=Math.floor(s/60);return 'há '+m+'min';
+    if(s<5)return 'just now';if(s<60)return s+'s ago';var m=Math.floor(s/60);return m+'m ago';
   }
 
   function renderHearts(count,max){
@@ -109,7 +109,7 @@
     tool:'pickaxe',armor:'shield',accessory:'circle-dot',ammo:'move-up-right',potion:'flask-round',
     block:'box',coin:'coins',material:'gem'};
   function glyphEl(kind){var s=el('span','glyph');s.appendChild(icon(GLYPHS[kind]||GLYPHS.material));return s;}
-  var KIND_LABEL={melee:'Arma corpo-a-corpo',ranged:'Arma à distância',magic:'Arma mágica',summon:'Invocação',weapon:'Arma',tool:'Ferramenta',armor:'Armadura',accessory:'Acessório',ammo:'Munição',potion:'Poção',block:'Bloco',coin:'Moeda',material:'Material'};
+  var KIND_LABEL={melee:'Melee Weapon',ranged:'Ranged Weapon',magic:'Magic Weapon',summon:'Summon Weapon',weapon:'Weapon',tool:'Tool',armor:'Armor',accessory:'Accessory',ammo:'Ammo',potion:'Potion',block:'Block',coin:'Coin',material:'Material'};
   var spritesOn={item:false,buff:false,npc:false};
 
   function itemTile(it){
@@ -142,7 +142,7 @@
   }
   function coinsEl(w){
     var box=el('span','coins');
-    if(!w||(!w.plat&&!w.gold&&!w.silver&&!w.copper)){box.appendChild(el('span','zero','sem moedas'));return box;}
+    if(!w||(!w.plat&&!w.gold&&!w.silver&&!w.copper)){box.appendChild(el('span','zero','no coins'));return box;}
     [['p',w.plat],['g',w.gold],['s',w.silver],['c',w.copper]].forEach(function(c){
       if(!c[1])return;var e=el('span','coin '+c[0]);e.appendChild(el('i'));e.appendChild(document.createTextNode(c[1]));box.appendChild(e);
     });
@@ -153,26 +153,26 @@
 
   function renderStats(st){
     var f=document.createDocumentFragment();
-    if(st.lifeMax)f.appendChild(barEl('Vida','life',st.dead?0:st.life,st.lifeMax));
+    if(st.lifeMax)f.appendChild(barEl('Health','life',st.dead?0:st.life,st.lifeMax));
     if(st.manaMax)f.appendChild(barEl('Mana','mana',st.mana,st.manaMax));
     var grid=el('div','m-grid');
     function stat(k,v){if(v==null||v===''||typeof v==='object')return;var c=el('div','m-stat');c.appendChild(el('div','k',k));c.appendChild(el('div','v',v));grid.appendChild(c);}
-    stat('Defesa',st.defense);stat('Modo',st.difficulty);
-    if(st.deaths!=null)stat('Mortes',st.deaths);
-    stat('Itens no inventário',st.inventoryCount);
+    stat('Defense',st.defense);stat('Mode',st.difficulty);
+    if(st.deaths!=null)stat('Deaths',st.deaths);
+    stat('Inventory count',st.inventoryCount);
     if(grid.childElementCount)f.appendChild(grid);
-    if(st.wealth){f.appendChild(el('div','m-sec-title','Riqueza'));var wb=el('div');wb.appendChild(coinsEl(st.wealth));f.appendChild(wb);}
+    if(st.wealth){f.appendChild(el('div','m-sec-title','Coins'));var wb=el('div');wb.appendChild(coinsEl(st.wealth));f.appendChild(wb);}
     if(st.held){
-      f.appendChild(el('div','m-sec-title','Na mão'));
+      f.appendChild(el('div','m-sec-title','Held Item'));
       var h=el('div','m-held');h.appendChild(itemTile(st.held));
       var hn=el('div','hn');hn.appendChild(el('b',null,(st.held.prefix?st.held.prefix+' ':'')+st.held.name));
       hn.appendChild(el('small',null,KIND_LABEL[st.held.kind]||'Item'));h.appendChild(hn);f.appendChild(h);
     }
     function section(title,arr){if(arr&&arr.length){f.appendChild(el('div','m-sec-title',title));f.appendChild(tileGrid(arr));}}
-    section('Equipado',st.equips);section('Vaidade',st.vanity);section('Utilitários',st.misc);
-    section('Munição',st.ammo);section('Inventário',st.inventory);
+    section('Equipment',st.equips);section('Vanity',st.vanity);section('Misc & Utilities',st.misc);
+    section('Ammo',st.ammo);section('Inventory',st.inventory);
     if(st.buffs&&st.buffs.length){
-      f.appendChild(el('div','m-sec-title','Buffs ativos'));var bl=el('div','m-list');
+      f.appendChild(el('div','m-sec-title','Active Buffs'));var bl=el('div','m-list');
       st.buffs.forEach(function(b){bl.appendChild(buffChip(typeof b==='string'?{name:b,id:-1}:b));});f.appendChild(bl);
     }
     return f;
@@ -182,23 +182,22 @@
     $('mTitle').textContent=p.name;
     var sess=$('mSession');sess.textContent='';
     sess.appendChild(el('span','dotg'));
-    sess.appendChild(document.createTextNode('online '+(p.onlineForSec!=null?('há '+fmtDur(p.onlineForSec)):'agora')
+    sess.appendChild(document.createTextNode('online '+(p.onlineForSec!=null?('for '+fmtDur(p.onlineForSec)):'just joined')
       +(p.stats&&typeof p.stats.pingMs==='number'?(' · ping '+p.stats.pingMs+' ms'):'')));
     var body=$('mBody');body.textContent='';
     var st=p.stats;
     if(st){
       var badges=el('div','m-badges');
-      if(st.dead)badges.appendChild(pill('dead','Morto'+(st.respawnSec?(' · volta em '+st.respawnSec+'s'):''),'skull'));
-      else badges.appendChild(pill('alive','Vivo','heart-pulse'));
+      if(st.dead)badges.appendChild(pill('dead','Dead'+(st.respawnSec?(' · respawn in '+st.respawnSec+'s'):''),'skull'));
+      else badges.appendChild(pill('alive','Alive','heart-pulse'));
       if(st.biome)badges.appendChild(pill('biome',st.biome,'map-pin'));
       body.appendChild(badges);
       body.appendChild(renderStats(st));
     }else{
       var note=el('div','m-note');
-      note.innerHTML='<b>Vida, mana, defesa, equipamentos e inventário</b> aparecem aqui quando o '+
-        'mod de stats está ativo no servidor. Ele é <b>server-side</b>, você <b>não</b> precisa dele pra entrar. '+
-        'Sem ele, o servidor só informa <b>quem</b> está online e há quanto tempo. Detalhes no '+
-        '<a href="https://github.com/Bobagi/terraria-status#character-stats-optional" target="_blank" rel="noopener">repositório</a>.';
+      note.innerHTML='<b>Health, mana, defense, equipment, and inventory</b> appear here when the '+
+        'companion mod is active on the server. It is <b>server-side</b>: you <b>do not</b> need it to join. '+
+        'Without it, the server reports player names and session duration.';
       body.appendChild(note);
     }
   }
@@ -348,7 +347,7 @@
         var ping=p.stats&&p.stats.pingMs;
         if(typeof ping==='number'){
           var rp=el('span','rping'+(ping>=150?' bad':ping>=80?' mid':''),ping+' ms');
-          rp.title='ping até o servidor';btn.appendChild(rp);
+          rp.title='ping to server';btn.appendChild(rp);
         }
         {var ch=icon('chevron-right');ch.setAttribute('class','ic chev');btn.appendChild(ch);}
         btn.addEventListener('click',function(){openModal(p.name);});
@@ -380,22 +379,21 @@
     // world simulation speed, only measured while someone is playing
     var tps=d.world&&d.world.live&&d.world.live.tps,te=$('tps');
     var tf=$('tpsFill');
-    if(typeof tps==='number'){te.textContent=Math.round(tps)+' / 60 por s';
+    if(typeof tps==='number'){te.textContent=Math.round(tps)+' / 60 /s';
       tf.style.width=Math.min(100,tps/60*100)+'%';tf.className='fill tps'+(tps<50?' hot':tps<58?' warn':'');}
-    else{te.textContent=d.players&&d.players.count?'medindo…':'parado';te.title=d.players&&d.players.count?'':'o servidor só simula o mundo com alguém jogando';tf.style.width='0';tf.className='fill tps';}
+    else{te.textContent=d.players&&d.players.count?'measuring…':'idle';te.title=d.players&&d.players.count?'':'the server only simulates the world when players are connected';tf.style.width='0';tf.className='fill tps';}
     var tiles=d.world&&d.world.tiles;
     if(tiles){$('worldSize').textContent=tiles.width+' x '+tiles.height+sizeName(tiles);
-      $('pillSize').textContent='Mundo '+tiles.width+' x '+tiles.height;}
+      $('pillSize').textContent='World '+tiles.width+' x '+tiles.height;}
 
     // world + version freshness
     if(d.world&&d.world.name)$('worldName').textContent=d.world.name;
     $('lastSave').textContent=d.world.lastSaveAt?fmtAgo(d.world.lastSaveAt):'-';
     var s=d.server||{};
-    askSetEnabled(d.ask);
     $('ver').textContent=s.tmodloaderVersion?('v'+s.tmodloaderVersion):'-';
     var badge=$('verBadge'),warn=$('staleWarn');
-    if(s.upToDate===true){badge.hidden=false;badge.className='vbadge ok';badge.replaceChildren(icon('check'),'atualizado');warn.hidden=true;}
-    else if(s.upToDate===false){badge.hidden=false;badge.className='vbadge stale';badge.replaceChildren(icon('triangle-alert'),'desatualizada');
+    if(s.upToDate===true){badge.hidden=false;badge.className='vbadge ok';badge.replaceChildren(icon('check'),'up to date');warn.hidden=true;}
+    else if(s.upToDate===false){badge.hidden=false;badge.className='vbadge stale';badge.replaceChildren(icon('triangle-alert'),'out of date');
       warn.hidden=false;$('latestVer').textContent='v'+(s.latestVersion||'?');}
     else{badge.hidden=true;warn.hidden=true;}
 
@@ -407,11 +405,11 @@
       wl.appendChild(wpill('prog',lw.progression||'-','swords'));
       // day/night pill uses the seeded client clock (falls back to live only pre-seed)
       var sc=skyClock(),dn=sc||{day:lw.dayTime,text:lw.timeText};
-      wl.appendChild(wpill('',(dn.day?'Dia':'Noite')+(dn.text?(' · '+dn.text):''),dn.day?'sun':'moon'));
-      if(lw.bloodMoon)wl.appendChild(wpill('warn','Lua de Sangue','droplet'));
-      if(lw.eclipse)wl.appendChild(wpill('warn','Eclipse Solar','eclipse'));
-      if(lw.pumpkinMoon)wl.appendChild(wpill('warn','Lua Abóbora','ghost'));
-      if(lw.snowMoon)wl.appendChild(wpill('warn','Lua Gelada','snowflake'));
+      wl.appendChild(wpill('',(dn.day?'Day':'Night')+(dn.text?(' · '+dn.text):''),dn.day?'sun':'moon'));
+      if(lw.bloodMoon)wl.appendChild(wpill('warn','Blood Moon','droplet'));
+      if(lw.eclipse)wl.appendChild(wpill('warn','Solar Eclipse','eclipse'));
+      if(lw.pumpkinMoon)wl.appendChild(wpill('warn','Pumpkin Moon','ghost'));
+      if(lw.snowMoon)wl.appendChild(wpill('warn','Frost Moon','snowflake'));
     }else{wl.hidden=true;}
     renderBosses(d.world&&d.world.progress);
 
@@ -420,11 +418,11 @@
     if(!mbox.childElementCount&&d.mods){
       d.mods.forEach(function(m){
         var a=document.createElement('a');
-        a.className='mod';a.href=m.local?m.href:'https://steamcommunity.com/sharedfiles/filedetails/?id='+m.id;
+        a.className='mod';a.href=m.id?'https://steamcommunity.com/sharedfiles/filedetails/?id='+m.id:(m.href||'#');
         a.target='_blank';a.rel='noopener';a.style.setProperty('--mc','var(--'+m.rarity+')');
         // Local mods (ours, not on the Workshop) come from the server itself on join.
-        a.innerHTML='<div class="mn"><span></span><span class="ext">'+(m.local?'Código':'Workshop')+' <svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#external-link"/></svg></span></div>'+
-          '<div class="md"></div><div class="mid">'+(m.local?'Baixa sozinho ao entrar':'ID '+m.id)+'</div>';
+        a.innerHTML='<div class="mn"><span></span><span class="ext">'+(m.local?'Source':'Workshop')+' <svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#external-link"/></svg></span></div>'+
+          '<div class="md"></div><div class="mid">'+(m.id?'ID '+m.id:'Active mod')+'</div>';
         a.querySelector('.mn span').textContent=m.name;
         a.querySelector('.md').textContent=m.desc;
         mbox.appendChild(a);
@@ -444,32 +442,32 @@
   // Vanilla presets by name; a widened small world (8400 x 1200) gets its own label.
   function sizeName(t){
     var k=t.width+'x'+t.height;
-    var n={'4200x1200':'pequeno','6400x1800':'médio','8400x2400':'grande','8400x1200':'pequeno dobrado'}[k];
+    var n={'4200x1200':'Small','6400x1800':'Medium','8400x2400':'Large','8400x1200':'Double Small'}[k];
     return n?' ('+n+')':'';
   }
-  // Progression order, names as the game shows them in pt-BR. Numbers are boss head
+  // Progression order, names in English. Numbers are boss head
   // sprites (NPCID.Sets.BossHeadTextures); 'item:' uses an item sprite instead.
   var BOSSES=[
-    ['kingSlime','Geleia Rei',7],['eyeOfCthulhu','Olho de Cthulhu',0],
-    ['eaterOfWorlds','Devorador de Mundos',2],['brainOfCthulhu','Cérebro de Cthulhu',23],
-    ['queenBee','Abelha Rainha',14],['skeletron','Esqueletron',19],['deerclops','Cervoclope',39],
-    ['wallOfFlesh','Parede de Carne',22],['queenSlime','Geleia Rainha',38],['theTwins','Os Gêmeos',20],
-    ['destroyer','O Destruidor',25],['skeletronPrime','Esqueletron Alfa',18],['plantera','Plantera',11],
-    ['golem','Golem',5],['duke','Duque Peixe-dragão',4],['empress','Imperatriz da Luz',37],
-    ['cultist','Cultista Lunático',24],['moonLord','Senhor da Lua',8]
+    ['kingSlime','King Slime',7],['eyeOfCthulhu','Eye of Cthulhu',0],
+    ['eaterOfWorlds','Eater of Worlds',2],['brainOfCthulhu','Brain of Cthulhu',23],
+    ['queenBee','Queen Bee',14],['skeletron','Skeletron',19],['deerclops','Deerclops',39],
+    ['wallOfFlesh','Wall of Flesh',22],['queenSlime','Queen Slime',38],['theTwins','The Twins',20],
+    ['destroyer','The Destroyer',25],['skeletronPrime','Skeletron Prime',18],['plantera','Plantera',11],
+    ['golem','Golem',5],['duke','Duke Fishron',4],['empress','Empress of Light',37],
+    ['cultist','Lunatic Cultist',24],['moonLord','Moon Lord',8]
   ];
   var EVENTS=[
-    ['bloodMoon','Lua de Sangue','item:4271'],['goblins','Invasão dos Goblins','item:361'],
-    ['oldOnesArmy','Exército do Antigo','item:3828'],['darkMage','Mago Sombrio',32],
-    ['ogre','Ogro',33],['betsy','Betsy',34],['frostLegion','Legião Congelada','item:602'],
-    ['pirates','Invasão Pirata','item:1315'],['flyingDutchman','Holandês Voador',26],
-    ['eclipse','Eclipse Solar','item:2767'],['pumpkinMoon','Lua de Abóbora','item:1844'],
-    ['mourningWood','Árvore da Morte',10],['pumpking','Reibóbora',13],
-    ['frostMoon','Lua Congelada','item:1958'],['everscream','Everscream',3],
-    ['santaNK1','Papai-Noel-NK1',17],['iceQueen','Rainha do Gelo',6],
-    ['martians','Invasão Marciana','item:2797'],['martianSaucer','Disco Marciano',9],
-    ['solarPillar','Pilar Solar',27],['vortexPillar','Pilar do Vórtice',28],
-    ['nebulaPillar','Pilar da Nebulosa',29],['stardustPillar','Pilar de Poeira Estelar',30]
+    ['bloodMoon','Blood Moon','item:4271'],['goblins','Goblin Army','item:361'],
+    ['oldOnesArmy',"Old One's Army",'item:3828'],['darkMage','Dark Mage',32],
+    ['ogre','Ogre',33],['betsy','Betsy',34],['frostLegion','Frost Legion','item:602'],
+    ['pirates','Pirate Invasion','item:1315'],['flyingDutchman','Flying Dutchman',26],
+    ['eclipse','Solar Eclipse','item:2767'],['pumpkinMoon','Pumpkin Moon','item:1844'],
+    ['mourningWood','Mourning Wood',10],['pumpking','Pumpking',13],
+    ['frostMoon','Frost Moon','item:1958'],['everscream','Everscream',3],
+    ['santaNK1','Santa-NK1',17],['iceQueen','Ice Queen',6],
+    ['martians','Martian Madness','item:2797'],['martianSaucer','Martian Saucer',9],
+    ['solarPillar','Solar Pillar',27],['vortexPillar','Vortex Pillar',28],
+    ['nebulaPillar','Nebula Pillar',29],['stardustPillar','Stardust Pillar',30]
   ];
   function bossTile(b,done){
     var li=el('li','boss'+(done?' done':''));
@@ -481,7 +479,7 @@
     }
     li.appendChild(el('span','bn',b[1]));
     if(done){var mark=icon('check');mark.setAttribute('class','ic bs');li.appendChild(mark);}
-    li.appendChild(el('span','sr-only',done?' (derrotado)':' (ainda não derrotado)'));
+    li.appendChild(el('span','sr-only',done?' (defeated)':' (not defeated)'));
     return li;
   }
   var bossKey='';
@@ -501,7 +499,7 @@
     EVENTS.forEach(function(b){ev.appendChild(bossTile(b,!!p.downed[b[0]]));});
     $('bossCount').textContent=done+'/'+list.length;
     $('bossFill').style.width=(done/list.length*100)+'%';
-    $('bossBar').setAttribute('aria-label',done+' de '+list.length+' bosses derrotados');
+    $('bossBar').setAttribute('aria-label',done+' of '+list.length+' bosses defeated');
     renderModBosses(p.modBosses||[]);
     $('bossPanel').hidden=false;
   }
@@ -510,7 +508,7 @@
     var box=$('modBossBox'),ul=$('modBossList');ul.textContent='';
     if(!list.length){box.hidden=true;return;}
     var mods=[];list.forEach(function(b){if(mods.indexOf(b.mod)<0)mods.push(b.mod);});
-    $('modBossTitle').textContent='Bosses dos mods ('+mods.map(function(m){return MOD_NAMES[m]||m;}).join(', ')+')';
+    $('modBossTitle').textContent='Modded Bosses ('+mods.map(function(m){return MOD_NAMES[m]||m;}).join(', ')+')';
     list.forEach(function(b){
       var li=el('li','boss'+(b.downed?' done':'')+(b.kind!=='boss'?' minor':''));
       if(b.icon){
@@ -520,27 +518,27 @@
       li.appendChild(el('span','bn',b.name));
       if(b.kind==='miniboss')li.appendChild(el('span','bk','miniboss'));
       if(b.downed){var mark=icon('check');mark.setAttribute('class','ic bs');li.appendChild(mark);}
-      li.appendChild(el('span','sr-only',b.downed?' (derrotado)':' (ainda não derrotado)'));
+      li.appendChild(el('span','sr-only',b.downed?' (defeated)':' (not defeated)'));
       ul.appendChild(li);
     });
     var done=list.filter(function(b){return b.downed;}).length;
     $('modBossCount').textContent=done+'/'+list.length;
     $('modBossFill').style.width=(done/list.length*100)+'%';
-    $('modBossBar').setAttribute('aria-label',done+' de '+list.length+' bosses de mods derrotados');
+    $('modBossBar').setAttribute('aria-label',done+' of '+list.length+' modded bosses defeated');
     box.hidden=false;
   }
 
   function tick(){
     fetch('/api/status',{cache:'no-store'}).then(function(r){return r.json();})
       .then(apply).catch(function(){
-        var gem=$('gem');gem.className='status-gem is-loading';$('gemText').textContent='sem conexão';
+        var gem=$('gem');gem.className='status-gem is-loading';$('gemText').textContent='no connection';
       });
   }
 
   // copy address
   function copyAddr(){
     var txt=$('addr').textContent.trim();
-    var show=function(ok){var t=$('toast');t.textContent=ok?'Endereço copiado!':'Não deu pra copiar, selecione o IP e copie à mão';
+    var show=function(ok){var t=$('toast');t.textContent=ok?'Address copied to clipboard!':'Could not copy, please copy manually.';
       t.classList.toggle('err',!ok);t.classList.add('show');setTimeout(function(){t.classList.remove('show');},ok?1600:3200);};
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){show(true);},function(){show(false);});}
     else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);show(ok);}
@@ -580,178 +578,26 @@
       ev.preventDefault();
       var mode=(ev.submitter&&ev.submitter.value)||'night';
       btns.forEach(function(b){b.disabled=true;});
-      say(mode==='day'?'Fazendo amanhecer...':'Fazendo anoitecer...');
+      say(mode==='day'?'Setting to day...':'Setting to night...');
       fetch('/api/time',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({mode:mode,password:pass.value})})
         .then(function(r){return r.json().catch(function(){return{};}).then(function(j){return{status:r.status,j:j};});})
         .then(function(x){
           var j=x.j||{};
           if(x.status===200){
             try{localStorage.setItem(KEY,pass.value);}catch(e){}
-            say(mode==='day'?'Pronto, amanheceu no servidor.':'Pronto, anoiteceu no servidor.','ok');
+            say(mode==='day'?'Server time changed to day.':'Server time changed to night.','ok');
             skySeeded=false;setTimeout(tick,4000);
           }else if(j.error==='senha'){
             try{localStorage.removeItem(KEY);}catch(e){}
-            say('Senha errada.'+(j.left==null?'':j.left===1?' Resta 1 tentativa.':' Restam '+j.left+' tentativas.'),'err');
-          }else if(j.error==='bloqueado'){say('Muitas senhas erradas. Tente de novo em 15 minutos.','err');}
-          else if(j.error==='espera'){say('Calma: o tempo acabou de mudar. Tente em '+j.retrySec+' s.','err');}
-          else if(j.error==='desligado'){say('O botão está desligado no servidor.','err');}
-          else{say('Não deu para falar com o servidor. Tente de novo.','err');}
+            say('Incorrect password.'+(j.left==null?'':j.left===1?' 1 attempt remaining.':' '+j.left+' attempts remaining.'),'err');
+          }else if(j.error==='bloqueado'){say('Too many failed attempts. Try again in 15 minutes.','err');}
+          else if(j.error==='espera'){say('Please wait: time was just changed. Retry in '+j.retrySec+'s.','err');}
+          else if(j.error==='desligado'){say('Time control is disabled on the server.','err');}
+          else{say('Could not reach the server. Please try again.','err');}
         })
-        .catch(function(){say('Sem conexão com o site. Tente de novo.','err');})
+        .catch(function(){say('No connection to server. Please try again.','err');})
         .then(function(){btns.forEach(function(b){b.disabled=false;});});
     });
-  })();
-
-  // ---- "Pergunte ao Claude": POST /api/ask, answer streamed as server-sent events.
-  // The server enforces everything (password, 5 questions per conversation, limits);
-  // this only draws it. The answer is model text: rendered with DOM nodes and
-  // textContent only, never innerHTML, and links are limited to http(s).
-  var askSetEnabled=function(){};
-  (function(){
-    var panel=$('askPanel'),form=$('askForm'),log=$('askLog'),text=$('askText'),pass=$('askPass'),
-        msg=$('askMsg'),count=$('askCount'),send=$('askSend'),fresh=$('askNew');
-    if(!panel)return;
-    var KEY='tmodTimePass',convId=null,used=0,max=5,closed=false,busy=false,off=null;
-    try{pass.value=localStorage.getItem(KEY)||'';}catch(e){}
-    askSetEnabled=function(a){
-      // The box always shows; until the server turns it on it is drawn switched off.
-      var isOff=!(a&&a.enabled);
-      if(isOff!==off){off=isOff;if(off)say('Ainda desligado: o dono ainda não ligou as perguntas no servidor.');else say('');paint();}
-      if(a&&a.maxQuestions&&!used){max=a.maxQuestions;$('askMax').textContent=max;}
-    };
-    function say(t,cls){msg.textContent=t||'';msg.className='tc-msg'+(cls?' '+cls:'');}
-    function paint(){
-      count.textContent=used?('Pergunta '+used+' de '+max):'';
-      fresh.hidden=!used;
-      text.disabled=busy||closed||!!off;send.disabled=busy||closed||!!off;pass.disabled=!!off;
-      text.placeholder=closed?'Conversa encerrada. Clique em "Nova conversa" para perguntar de novo.':text.getAttribute('data-ph');
-    }
-    text.setAttribute('data-ph',text.placeholder);
-
-    // inline markdown: `code`, **bold**, *italic*, [label](http...) and bare URLs
-    function inline(parent,src){
-      var re=/`([^`\n]+)`|\*\*([^*\n]+)\*\*|\*([^*\s][^*\n]*)\*|\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>)\]]+)/g,last=0,m;
-      while((m=re.exec(src))){
-        if(m.index>last)parent.appendChild(document.createTextNode(src.slice(last,m.index)));
-        if(m[1]!=null)parent.appendChild(el('code',null,m[1]));
-        else if(m[2]!=null)inline(parent.appendChild(el('b')),m[2]);
-        else if(m[3]!=null)inline(parent.appendChild(el('i')),m[3]);
-        else parent.appendChild(link(m[5]||m[6],m[4]||m[6]));
-        last=re.lastIndex;
-      }
-      if(last<src.length)parent.appendChild(document.createTextNode(src.slice(last)));
-    }
-    function link(url,label){
-      var a=el('a',null,label);
-      if(/^https?:\/\//i.test(url)){a.href=url;a.target='_blank';a.rel='noopener noreferrer nofollow';}
-      return a;
-    }
-    function markdown(box,src){
-      box.textContent='';
-      var lines=src.replace(/\r/g,'').split('\n'),para=[],list=null,code=null;
-      function flush(){if(para.length){inline(box.appendChild(el('p')),para.join(' '));para=[];}}
-      for(var i=0;i<lines.length;i++){
-        var ln=lines[i],m;
-        if(code){if(/^\s*```/.test(ln)){code=null;}else{code.textContent+=(code.textContent?'\n':'')+ln;}continue;}
-        if(/^\s*```/.test(ln)){flush();list=null;code=box.appendChild(el('pre')).appendChild(el('code'));continue;}
-        if((m=/^\s*#{1,6}\s+(.*)$/.exec(ln))){flush();list=null;inline(box.appendChild(el('h4')),m[1]);continue;}
-        if((m=/^\s*(?:[-*•]|(\d+)[.)])\s+(.*)$/.exec(ln))){
-          flush();var tag=m[1]?'ol':'ul';
-          if(!list||list.tagName.toLowerCase()!==tag){list=box.appendChild(el(tag));if(m[1])list.start=parseInt(m[1],10);}
-          inline(list.appendChild(el('li')),m[2]);continue;
-        }
-        if(!ln.trim()){flush();list=null;continue;}
-        if(list&&/^\s{2,}\S/.test(ln)&&list.lastChild){inline(list.lastChild,' '+ln.trim());continue;}
-        list=null;para.push(ln.trim());
-      }
-      flush();
-    }
-
-    function bubble(cls){var b=el('div','ask-msg '+cls);log.appendChild(b);return b;}
-    function toEnd(){log.scrollTop=log.scrollHeight;}
-    var STATUS={think:'Pensando...',search:'Pesquisando na internet...',fetch:'Lendo uma página...'};
-    var ERR={
-      curta:'Escreva a pergunta.',longa:'Pergunta longa demais (até 800 caracteres).',
-      ocupado:'Espere a resposta anterior terminar.',fila:'Tem gente demais perguntando agora. Tente em um minuto.',
-      desligado:'As perguntas estão desligadas no servidor.',bloqueado:'Muitas senhas erradas. Tente de novo em 15 minutos.',
-      recusa:'O Claude não quis responder essa. Tente reformular.',demorou:'A pesquisa demorou demais. Tente uma pergunta mais direta.',
-      claude:'O Claude não respondeu agora. Tente de novo em instantes.'
-    };
-    function errText(j){
-      if(j.error==='senha')return 'Senha errada.'+(j.left==null?'':j.left===1?' Resta 1 tentativa.':' Restam '+j.left+' tentativas.');
-      if(j.error==='ritmo')return 'Você já perguntou bastante nesta hora. Volte em '+Math.max(1,Math.ceil((j.retrySec||60)/60))+' min.';
-      if(j.error==='orcamento')return j.scope==='mes'?'A cota de perguntas deste mês acabou.':'A cota de perguntas de hoje acabou. Volta amanhã.';
-      return ERR[j.error]||'Não deu para falar com o servidor. Tente de novo.';
-    }
-
-    function reset(){
-      // tell the server to end the old session now instead of letting it expire
-      if(convId){fetch('/api/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:pass.value,close:convId})}).catch(function(){});}
-      convId=null;used=0;closed=false;log.textContent='';say('');paint();text.focus();
-    }
-    fresh.addEventListener('click',function(){if(!busy)reset();});
-    text.addEventListener('keydown',function(ev){
-      if(ev.key==='Enter'&&!ev.shiftKey&&!ev.isComposing){ev.preventDefault();if(form.requestSubmit)form.requestSubmit();else send.click();}
-    });
-
-    form.addEventListener('submit',function(ev){
-      ev.preventDefault();
-      var q=text.value.trim();
-      if(busy||closed||off||!q)return;
-      busy=true;say('');paint();
-      var qBox=bubble('q');qBox.textContent=q;
-      var box=bubble('a'),status=el('span','ask-status',STATUS.think),answer='',raf=0,ok=false;
-      box.appendChild(status);toEnd();
-      function draw(){raf=0;var stick=log.scrollHeight-log.scrollTop-log.clientHeight<60;markdown(box,answer);if(status)box.appendChild(status);if(stick)toEnd();}
-      function setStatus(t){if(!t){if(status&&status.parentNode)status.parentNode.removeChild(status);status=null;return;}if(!status)status=el('span','ask-status');status.textContent=t;box.appendChild(status);}
-      function fail(j){
-        setStatus(null);
-        if(!answer){log.removeChild(box);log.removeChild(qBox);text.value=q;}
-        if(j.error==='senha'){try{localStorage.removeItem(KEY);}catch(e){}pass.focus();}
-        say(errText(j),'err');
-      }
-      function onEvent(name,d){
-        if(name==='status'){setStatus(STATUS[d.kind]||STATUS.think);}
-        else if(name==='delta'){answer+=d.text;if(status)status.textContent='Escrevendo...';if(!raf)raf=requestAnimationFrame(draw);}
-        else if(name==='done'){
-          ok=true;setStatus(null);if(raf){cancelAnimationFrame(raf);}if(!answer)answer=d.text||'';markdown(box,answer||'(sem resposta)');
-          convId=d.conversationId||null;used=d.used;max=d.max;closed=!!d.closed;
-          if(closed)log.appendChild(el('div','ask-end','Conversa encerrada: '+max+' de '+max+' perguntas. A próxima começa do zero, sem lembrar desta.'));
-          try{localStorage.setItem(KEY,pass.value);}catch(e){}
-          var tp=$('timePass');if(tp&&!tp.value)tp.value=pass.value;
-          text.value='';toEnd();
-        }
-        else if(name==='error'){ok=true;fail(d);}
-      }
-      fetch('/api/ask',{method:'POST',headers:{'content-type':'application/json'},
-        body:JSON.stringify({password:pass.value,question:q,conversationId:convId})})
-        .then(function(r){
-          if(!/^text\/event-stream/i.test(r.headers.get('content-type')||'')){
-            return r.json().catch(function(){return{};}).then(function(j){ok=true;fail(j||{});});
-          }
-          var reader=r.body.getReader(),dec=new TextDecoder(),buf='';
-          function pump(){
-            return reader.read().then(function(x){
-              buf+=dec.decode(x.value||new Uint8Array(0),{stream:!x.done});
-              var at;
-              while((at=buf.indexOf('\n\n'))>=0){
-                var chunk=buf.slice(0,at),name='message',data='';buf=buf.slice(at+2);
-                chunk.split('\n').forEach(function(l){if(l.indexOf('event: ')===0)name=l.slice(7);else if(l.indexOf('data: ')===0)data+=l.slice(6);});
-                if(data){try{onEvent(name,JSON.parse(data));}catch(e){}}
-              }
-              if(!x.done)return pump();
-            });
-          }
-          return pump();
-        })
-        .catch(function(){})
-        .then(function(){
-          // the stream ended without a done/error event: the connection dropped
-          if(!ok){setStatus(null);if(answer){box.appendChild(el('p','ask-end','A conexão caiu no meio da resposta.'));}else{fail({});}}
-          busy=false;paint();if(!closed)text.focus();
-        });
-    });
-    paint();
   })();
 
   tick();

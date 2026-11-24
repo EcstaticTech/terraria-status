@@ -7,7 +7,7 @@ set -euo pipefail
 
 TERRAMAP_COMMIT=e4b03f4ab8878fa2e9d98668e991090272d6826f
 HERE="$(cd "$(dirname "$0")" && pwd)"
-OUT="$HERE/../../public/mapa"
+OUT="$HERE/../../public/map"
 export PATH="/opt/node-v22/bin:$PATH"   # vite 8 needs Node >= 20; the host default is 18
 
 WORK="$(mktemp -d)"
@@ -18,7 +18,7 @@ cd "$WORK/terramap"
 git checkout --quiet "$TERRAMAP_COMMIT"
 git apply "$HERE/serve-our-world.patch"
 npm ci --no-audit --no-fund
-BASE_PATH=/mapa/ npx vite build
+BASE_PATH=/map/ npx vite build
 
 # Upstream's public/ also ships old Windows installers and its own ads.txt.
 rm -rf dist/resources/*.zip dist/ads.txt dist/native.html dist/windows.html

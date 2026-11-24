@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Servidor Terraria tModLoader Bobagi · status ao vivo, jogadores online e como entrar</title>
-<meta name="description" content="Status ao vivo do servidor Terraria (tModLoader) Bobagi: quem está online, vida/inventário dos jogadores, CPU e RAM, versão do tModLoader, lista de mods e o passo a passo para entrar (IP 150.230.85.106, porta 7777).">
-<meta name="keywords" content="servidor terraria, tmodloader, servidor modado, terraria multiplayer, jogadores online, status servidor terraria, como entrar servidor terraria, bobagi">
+<title>Terraria tModLoader Server · Live Status, Online Players & Join Info</title>
+<meta name="description" content="Live status for the modded Terraria (tModLoader) server: online players, character inventory/vitals, CPU and RAM usage, tModLoader version, active mods, and join instructions (IP play.ronlab.site, port 7777).">
+<meta name="keywords" content="terraria server, tmodloader, modded terraria, terraria multiplayer, players online, server status, join terraria server, ronlab">
 <meta name="theme-color" content="#141235">
-<link rel="canonical" href="https://terraria.bobagi.space/">
+<link rel="canonical" href="https://terraria.ronlab.site/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Servidor Terraria tModLoader Bobagi · status ao vivo">
-<meta property="og:description" content="Veja quem está online, os recursos do servidor, a versão do tModLoader e como entrar no servidor modado Bobagi.">
-<meta property="og:url" content="https://terraria.bobagi.space/">
-<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Terraria tModLoader Server · Live Status">
+<meta property="og:description" content="See who is online, server resource usage, tModLoader version, and how to join the modded server.">
+<meta property="og:url" content="https://terraria.ronlab.site/">
+<meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 29C6 22 2 16 2 10a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 6-4 12-14 19Z' fill='%23ff3b57'/%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -38,31 +38,31 @@
 
 <main class="wrap">
   <section class="hero">
-    <p class="eyebrow">Servidor Terraria 1.4 · tModLoader</p>
+    <p class="eyebrow">Terraria 1.4 · tModLoader Server</p>
     <div class="brandline">
-      <h1 class="brand">BOBAGI</h1>
-      <span id="gem" class="status-gem is-loading"><span class="gem"></span><span id="gemText">carregando…</span></span>
+      <h1 class="brand">RONLAB</h1>
+      <span id="gem" class="status-gem is-loading"><span class="gem"></span><span id="gemText">loading…</span></span>
     </div>
-    <p class="sub">Mundo modado pra jogar com os amigos. Esta página mostra tudo ao vivo.</p>
+    <p class="sub">Modded Terraria world to play together. Live server status and stats.</p>
 
     <div class="join">
       <div class="sign" id="sign">
         <div class="addr-box">
-          <span class="lbl">IP do servidor</span>
-          <span class="addr" id="addr">150.230.85.106</span>
+          <span class="lbl">Server Address</span>
+          <span class="addr" id="addr">play.ronlab.site</span>
         </div>
-        <button class="copy" id="copyBtn" type="button" aria-label="Copiar IP"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#copy"/></svg><span class="copy-txt">Copiar</span></button>
+        <button class="copy" id="copyBtn" type="button" aria-label="Copy Address"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#copy"/></svg><span class="copy-txt">Copy</span></button>
       </div>
-      <div class="alt-ip">porta: <code id="portAlt">7777</code> (pedida na tela seguinte). Use o IP, não bobagi.space.</div>
+      <div class="alt-ip">port: <code id="portAlt">7777</code> (prompted on the next screen).</div>
       <div class="launch-row">
-        <a class="steam-btn" id="steamBtn" href="steam://run/1281930"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#play"/></svg>Abrir tModLoader</a>
-        <span class="launch-note">abre o jogo pela Steam, depois Multiplayer → Join via IP</span>
+        <a class="steam-btn" id="steamBtn" href="steam://run/1281930"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#play"/></svg>Launch tModLoader</a>
+        <span class="launch-note">launches via Steam, then go to Multiplayer → Join via IP</span>
       </div>
       <div class="pill-row">
         <span class="pill exp"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#swords"/></svg>Expert</span>
-        <span class="pill size"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#mountain"/></svg><span id="pillSize">Mundo</span></span>
-        <span class="pill slots"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#users"/></svg><span id="pillSlots">8</span> vagas</span>
-        <span class="pill lock"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#lock"/></svg>Com senha</span>
+        <span class="pill size"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#mountain"/></svg><span id="pillSize">World</span></span>
+        <span class="pill slots"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#users"/></svg><span id="pillSlots">8</span> slots</span>
+        <span class="pill lock"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#lock"/></svg>Password Protected</span>
       </div>
     </div>
   </section>
@@ -71,12 +71,12 @@
     <!-- how to join (top) -->
     <div class="col-7">
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--yellow)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#log-in"/></svg></span>Como entrar</h2>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--yellow)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#log-in"/></svg></span>How to Join</h2>
         <ol class="steps">
-          <li><span class="st">Instale o <b>tModLoader</b> (grátis na Steam, dono do Terraria), ou clique em <b>Abrir tModLoader</b> acima.</span></li>
-          <li><span class="st">Abra <b>Workshop → Mod Browser</b> e assine os mods logo abaixo (ou deixe o servidor baixar no join).</span></li>
-          <li><span class="st"><b>Deixe o tModLoader atualizar pela Steam</b>, a versão precisa bater com a do servidor.</span></li>
-          <li><span class="st">No menu, <b>Multiplayer → Join via IP</b>: digite o IP <code id="stepAddr">150.230.85.106</code>, porta <code>7777</code> e a <b>senha</b>.</span></li>
+          <li><span class="st">Install <b>tModLoader</b> (free on Steam if you own Terraria), or click <b>Launch tModLoader</b> above.</span></li>
+          <li><span class="st">Open <b>Workshop → Mod Browser</b> and enable the server mods (or let the server download them automatically when joining).</span></li>
+          <li><span class="st"><b>Keep tModLoader up to date on Steam</b> so your client matches the server version.</span></li>
+          <li><span class="st">In the main menu, select <b>Multiplayer → Join via IP</b>: enter <code id="stepAddr">play.ronlab.site</code>, port <code>7777</code> and the <b>password</b>.</span></li>
         </ol>
       </section>
     </div>
@@ -84,90 +84,69 @@
     <!-- world facts (top) -->
     <div class="col-5">
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--orange)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#earth"/></svg></span>O mundo</h2>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--orange)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#earth"/></svg></span>The World</h2>
         <ul class="facts">
-          <li><span class="fk">Nome</span><span class="fv" id="worldName">Hyperborea</span></li>
-          <li><span class="fk">Tamanho</span><span class="fv" id="worldSize">-</span></li>
-          <li><span class="fk">Dificuldade</span><span class="fv" style="color:var(--orange)">Expert</span></li>
-          <li><span class="fk">Máx. de jogadores</span><span class="fv">8</span></li>
-          <li><span class="fk">Último save</span><span class="fv" id="lastSave">-</span></li>
+          <li><span class="fk">Name</span><span class="fv" id="worldName">TestWorld</span></li>
+          <li><span class="fk">Size</span><span class="fv" id="worldSize">-</span></li>
+          <li><span class="fk">Difficulty</span><span class="fv" style="color:var(--orange)">Expert</span></li>
+          <li><span class="fk">Max Players</span><span class="fv">8</span></li>
+          <li><span class="fk">Last Save</span><span class="fv" id="lastSave">-</span></li>
           <li><span class="fk">tModLoader</span><span class="fv" style="font-size:.8rem"><span id="ver">-</span> <span id="verBadge" class="vbadge" hidden></span></span></li>
         </ul>
         <div class="wlive" id="wlive" hidden></div>
         <form class="timectl" id="timeCtl" autocomplete="on">
-          <span class="tc-label">Mudar o tempo agora</span>
+          <span class="tc-label">Change time of day</span>
           <div class="tc-row">
-            <label class="tc-pass"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#lock"/></svg><span class="sr-only">Senha do servidor</span>
-              <input id="timePass" type="password" name="password" autocomplete="current-password" placeholder="Senha do servidor" maxlength="128" required></label>
-            <button class="tc-btn day" type="submit" value="day"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#sun"/></svg>Dia</button>
-            <button class="tc-btn night" type="submit" value="night"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#moon"/></svg>Noite</button>
+            <label class="tc-pass"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#lock"/></svg><span class="sr-only">Server password</span>
+              <input id="timePass" type="password" name="password" autocomplete="current-password" placeholder="Server password" maxlength="128" required></label>
+            <button class="tc-btn day" type="submit" value="day"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#sun"/></svg>Day</button>
+            <button class="tc-btn night" type="submit" value="night"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#moon"/></svg>Night</button>
           </div>
           <p class="tc-msg" id="timeMsg" role="status" aria-live="polite"></p>
         </form>
-        <a class="map-btn" href="/mapa/"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#map"/></svg>Ver mapa do mundo</a>
+        <a class="map-btn" href="/map/"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#map"/></svg>View world map</a>
         <div class="stale-warn" id="staleWarn" hidden>
           <svg class="ic warn-ic" aria-hidden="true"><use href="/icons/icons.svg#triangle-alert"/></svg>
-          <span><b>Servidor desatualizado.</b> A versão <span id="latestVer" style="font-family:ui-monospace,Consolas,monospace"></span> do tModLoader já saiu; enquanto o servidor não atualiza, quem estiver na versão nova da Steam não consegue entrar. Ele se atualiza sozinho no próximo ciclo (diário).</span>
+          <span><b>Server out of date.</b> Version <span id="latestVer" style="font-family:ui-monospace,Consolas,monospace"></span> of tModLoader has been released. Until the server updates, players on the newest Steam build cannot join.</span>
         </div>
-      </section>
-    </div>
-
-    <!-- ask Claude (read-only analyst; drawn switched off until the server has an API key) -->
-    <div class="col-12" id="askPanel">
-      <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--purple)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#sparkle"/></svg></span>Pergunte ao Claude</h2>
-        <p class="note">Tire dúvidas sobre o jogo, os mods daqui ou se uma ideia é possível. Ele conhece o estado do servidor e pesquisa na internet, mas <b>só responde</b>: não mexe em nada no jogo. Cada conversa vai até <span id="askMax">5</span> perguntas.</p>
-        <div class="ask-log" id="askLog" role="log" aria-live="polite" aria-label="Conversa com o Claude"></div>
-        <form class="ask-form" id="askForm" autocomplete="on">
-          <label class="sr-only" for="askText">Sua pergunta</label>
-          <textarea id="askText" name="question" rows="2" maxlength="800" placeholder="Ex.: qual a melhor arma mágica antes do Plantera? Dá para ter um mod de pesca automática?" required></textarea>
-          <div class="ask-row">
-            <label class="tc-pass ask-pass"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#lock"/></svg><span class="sr-only">Senha do servidor</span>
-              <input id="askPass" type="password" name="password" autocomplete="current-password" placeholder="Senha do servidor" maxlength="128" required></label>
-            <span class="ask-count" id="askCount"></span>
-            <button class="ask-new" id="askNew" type="button" hidden>Nova conversa</button>
-            <button class="tc-btn ask-send" id="askSend" type="submit"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#message-square"/></svg>Perguntar</button>
-          </div>
-          <p class="tc-msg" id="askMsg" role="status" aria-live="polite"></p>
-        </form>
       </section>
     </div>
 
     <!-- players -->
     <div class="col-5">
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--green)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#users"/></svg></span>Jogadores online</h2>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--green)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#users"/></svg></span>Players Online</h2>
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
           <div class="count-big"><span id="pCount">0</span><small>/<span id="pMax">8</span></small></div>
-          <div class="hearts" id="hearts" aria-label="slots de jogadores"></div>
+          <div class="hearts" id="hearts" aria-label="player slots"></div>
         </div>
         <ul class="roster" id="roster"></ul>
-        <div class="empty" id="rosterEmpty" hidden>Ninguém explorando agora, <b>seja o primeiro</b> a entrar.</div>
-        <div class="roster-hint" id="rosterHint" hidden><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#mouse-pointer-click"/></svg>clique num jogador pra ver os detalhes</div>
+        <div class="empty" id="rosterEmpty" hidden>Nobody is exploring right now, <b>be the first</b> to join.</div>
+        <div class="roster-hint" id="rosterHint" hidden><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#mouse-pointer-click"/></svg>click a player to inspect character details</div>
       </section>
     </div>
 
     <!-- vitals -->
     <div class="col-7">
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--cyan)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#server"/></svg></span>Recursos do servidor</h2>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--cyan)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#server"/></svg></span>Server Resources</h2>
         <div class="vital">
-          <div class="top"><span class="name">Processador (CPU)</span><span class="val" id="cpuVal">-</span></div>
+          <div class="top"><span class="name">Processor (CPU)</span><span class="val" id="cpuVal">-</span></div>
           <div class="bar"><div class="fill cpu" id="cpuFill"></div></div>
         </div>
         <div class="vital">
-          <div class="top"><span class="name">Memória (RAM)</span><span class="val" id="ramVal">-</span></div>
+          <div class="top"><span class="name">Memory (RAM)</span><span class="val" id="ramVal">-</span></div>
           <div class="bar"><div class="fill ram" id="ramFill"></div></div>
         </div>
-        <div class="vital" title="O Terraria simula o mundo 60 vezes por segundo. Abaixo disso o próprio servidor está engasgando, e todo mundo sente lag.">
-          <div class="top"><span class="name">Velocidade do mundo</span><span class="val" id="tps">-</span></div>
+        <div class="vital" title="Terraria simulates the world 60 times per second. Below that, the server is falling behind and players experience lag.">
+          <div class="top"><span class="name">World Tick Rate</span><span class="val" id="tps">-</span></div>
           <div class="bar"><div class="fill tps" id="tpsFill"></div></div>
         </div>
         <div class="chips">
-          <div class="chip"><div class="k">No ar há</div><div class="v" id="uptime">-</div></div>
-          <div class="chip"><div class="k">Reinícios</div><div class="v" id="restarts">-</div></div>
-          <div class="chip"><div class="k">Rede ↓ / ↑</div><div class="v" id="net" style="font-size:.9rem">-</div></div>
-          <div class="chip"><div class="k">Mundo em disco</div><div class="v" id="disk">-</div></div>
+          <div class="chip"><div class="k">Uptime</div><div class="v" id="uptime">-</div></div>
+          <div class="chip"><div class="k">Restarts</div><div class="v" id="restarts">-</div></div>
+          <div class="chip"><div class="k">Network ↓ / ↑</div><div class="v" id="net" style="font-size:.9rem">-</div></div>
+          <div class="chip"><div class="k">World on Disk</div><div class="v" id="disk">-</div></div>
         </div>
       </section>
     </div>
@@ -175,16 +154,16 @@
     <!-- boss checklist -->
     <div class="col-12" id="bossPanel" hidden>
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--red)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#skull"/></svg></span>Bosses derrotados</h2>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--red)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#skull"/></svg></span>Defeated Bosses</h2>
         <div class="boss-head">
           <div class="bar" role="img" id="bossBar"><div class="fill boss" id="bossFill"></div></div>
           <span class="boss-count" id="bossCount">-</span>
         </div>
         <ul class="bosses" id="bossList"></ul>
-        <h3 class="boss-sub">Eventos e minibosses</h3>
+        <h3 class="boss-sub">Events and Minibosses</h3>
         <ul class="bosses" id="eventList"></ul>
         <div id="modBossBox" hidden>
-          <h3 class="boss-sub" id="modBossTitle">Bosses dos mods</h3>
+          <h3 class="boss-sub" id="modBossTitle">Modded Bosses</h3>
           <div class="boss-head">
             <div class="bar" role="img" id="modBossBar"><div class="fill boss" id="modBossFill"></div></div>
             <span class="boss-count" id="modBossCount">-</span>
@@ -197,50 +176,37 @@
     <!-- mods -->
     <div class="col-12">
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--purple)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#puzzle"/></svg></span>Mods do servidor</h2>
-        <p class="note">Pra entrar você precisa dos <b>mesmos <span id="modCount">7</span> mods</b>. O servidor baixa sozinho no join, mas assinar na Workshop deixa mais rápido. O Fargo's Souls traz itens fortes e bosses novos, e o <b>Eternity Mode</b> continua desligado.</p>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--purple)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#puzzle"/></svg></span>Server Mods</h2>
+        <p class="note">To join, you need the active mods listed below. The server can download them automatically on join, or you can subscribe via Steam Workshop.</p>
         <div class="mods" id="mods"></div>
       </section>
     </div>
 
-    <!-- what changed lately -->
-    <div class="col-7">
-      <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--yellow)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#megaphone"/></svg></span>Novidades</h2>
-        <ul class="news">
-          <li><time datetime="2026-11-03">03/11</time><span><b>O mundo dobrou de largura.</b> Passando o antigo oceano da direita tem um mundo novo inteiro: Carmesim, outra Selva com Templo, Neve, Deserto com Pirâmide, outra Dungeon e Shimmer. Do lado novo estão os minérios que faltavam (Chumbo, Platina, Paládio, Mithril e Titânio), então agora tem os 16.</span></li>
-          <li><time datetime="2026-11-03">03/11</time><span><b>Mais de um Pylon por bioma</b>, com o mod No Pylon Restrictions. As outras regras continuam: NPCs por perto, bioma certo e alcance.</span></li>
-          <li><time datetime="2026-11-03">03/11</time><span><b>Comando <code>/ping</code></b> no chat mostra o seu ping até o servidor.</span></li>
-          <li><time datetime="2026-11-01">01/11</time><span><b>Fargo's Mutant e Fargo's Souls</b> entraram, e o <a href="/mapa/">mapa do mundo</a> abre direto no navegador.</span></li>
-        </ul>
-      </section>
-    </div>
-
     <!-- chat commands -->
-    <div class="col-5">
+    <div class="col-12">
       <section class="panel">
-        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--cyan)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#message-square"/></svg></span>Comandos do chat</h2>
+        <h2 class="panel-title hud"><span class="sec-ic" style="color:var(--cyan)"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#message-square"/></svg></span>Chat Commands</h2>
         <dl class="cmds">
-          <dt><code>/ping</code></dt><dd>Seu ping até o servidor (só você vê).</dd>
-          <dt><code>/playing</code></dt><dd>Quem está online agora.</dd>
-          <dt><code>/roll</code></dt><dd>Sorteia um número de 1 a 100.</dd>
-          <dt><code>/p texto</code></dt><dd>Mensagem só para o seu time.</dd>
+          <dt><code>/ping</code></dt><dd>Your round-trip latency to the server (visible only to you).</dd>
+          <dt><code>/playing</code></dt><dd>List players currently online.</dd>
+          <dt><code>/roll</code></dt><dd>Rolls a random number from 1 to 100.</dd>
+          <dt><code>/p text</code></dt><dd>Team-only chat message.</dd>
         </dl>
-        <p class="note cmd-note">Até ~80 ms de ping é bom e até ~150 ms é jogável. Se a <b>velocidade do mundo</b> cair abaixo de 60/s, o lag é do servidor, não da sua conexão.</p>
+        <p class="note cmd-note">Ping under ~80 ms is optimal, up to ~150 ms is playable. If <b>world tick rate</b> drops below 60/s, lag is server-side.</p>
       </section>
     </div>
   </div>
 
   <footer>
-    <span class="live"><span class="beacon"></span>Atualizado <span id="updated">agora</span> · atualiza sozinho a cada 5s</span>
-    <div class="disclaimer">Página não oficial, feita por fãs. Terraria e tModLoader pertencem à Re-Logic. Servidor privado hospedado em bobagi.space.</div>
+    <span class="live"><span class="beacon"></span>Updated <span id="updated">just now</span> · auto-refreshes every 5s</span>
+    <div class="disclaimer">Unofficial fan-made status page. Terraria and tModLoader belong to Re-Logic. Hosted at terraria.ronlab.site.</div>
   </footer>
 </main>
 
 <!-- player detail modal -->
 <div class="modal-backdrop" id="modal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-    <button class="modal-x" id="modalX" type="button" aria-label="Fechar"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#x"/></svg></button>
+    <button class="modal-x" id="modalX" type="button" aria-label="Close"><svg class="ic" aria-hidden="true"><use href="/icons/icons.svg#x"/></svg></button>
     <div class="m-head">
       <span class="m-av" id="mAv">?</span>
       <div style="min-width:0">
@@ -252,7 +218,7 @@
   </div>
 </div>
 
-<div class="toast" id="toast">Endereço copiado!</div>
+<div class="toast" id="toast">Address copied to clipboard!</div>
 
 <script src="/js/app.js"></script>
 </body>

@@ -80,7 +80,7 @@ index ea6db3d..df47a7c 100644
 +    } catch (err) {
 +      notificationRef.current?.error({
 +        key: 'server-world',
-+        title: 'Não foi possível carregar o mundo do servidor',
++        title: 'Could not load server world',
 +        description: String(err),
 +        placement: 'bottomRight',
 +      });
@@ -173,7 +173,7 @@ index 3f0dd87..aad55ac 100644
        ], selectedKeys: [i18n.resolvedLanguage ?? i18n.language]
      }}>
 -      <Button icon={<GlobalOutlined />} />
-+      <Button aria-label="Idioma" icon={<GlobalOutlined />} />
++      <Button aria-label="Language" icon={<GlobalOutlined />} />
      </Dropdown>
    );
  }
@@ -194,7 +194,7 @@ index e5fce93..9a2add0 100644
                </Dropdown>
                <Dropdown menu={{ items: themeMenuItems, selectedKeys: [themeName] }}>
 -                <Button icon={isDarkMode ? <MoonOutlined /> : <SunOutlined />} />
-+                <Button aria-label="Tema" icon={isDarkMode ? <MoonOutlined /> : <SunOutlined />} />
++                <Button aria-label="Theme" icon={isDarkMode ? <MoonOutlined /> : <SunOutlined />} />
                </Dropdown>
                <LanguageDropdown />
              </Space.Compact>
@@ -203,7 +203,7 @@ index e5fce93..9a2add0 100644
            !worldLoaded && (
              <Dropdown menu={{ items: themeMenuItems, selectedKeys: [themeName] }}>
 -              <Button icon={isDarkMode ? <MoonOutlined /> : <SunOutlined />} />
-+              <Button aria-label="Tema" icon={isDarkMode ? <MoonOutlined /> : <SunOutlined />} />
++              <Button aria-label="Theme" icon={isDarkMode ? <MoonOutlined /> : <SunOutlined />} />
              </Dropdown>
            )
          }
@@ -211,7 +211,7 @@ index e5fce93..9a2add0 100644
          }}>
            <Button
              type="link"
-+            aria-label="Sobre o TerraMap"
++            aria-label="About TerraMap"
              icon={<QuestionCircleOutlined />}
              style={{ marginLeft: 'auto' }}
            />
@@ -265,7 +265,7 @@ index cbc135d..71cc9af 100644
      'pt-BR': { translation: ptBR },
    },
 -  lng: localStorage.getItem('language') ?? navigator.language ?? 'en',
-+  lng: localStorage.getItem('language') ?? 'pt-BR',
++  lng: localStorage.getItem('language') ?? 'en',
    fallbackLng: 'en',
    interpolation: { escapeValue: false },
  });

@@ -10,9 +10,14 @@ character-stats-mod/obj/
 # Decoded item/buff pixel sprites — optional local drop-in (Re-Logic assets, never commit)
 public/sprites/
 
-# TerraMap Web build (tools/terramap/build.sh)
+# TerraMap Web build (tools/terramap/build.sh or build.ps1)
 public/mapa/
+public/map/
 
 # Discord webhook secret + feed state (never commit)
 discord-webhook.url
 state/
+
+# Local development overrides (never commit)
+*.lnk
+start-tmap.bat

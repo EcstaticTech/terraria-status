@@ -300,18 +300,21 @@ Setup: install Claude Code on the host, log in as the user that runs this app, a
 drawn switched off and everything else works. Check Anthropic's terms for your kind of account
 before opening this to other people.
 
-## World map (`/mapa/`)
+## World map (`/map/`)
 
-`/mapa/` is a self-hosted build of [TerraMap Web](https://github.com/TerraMap/terramap.github.io) (MIT) that opens the server's world on its own: pan, zoom, ore and chest search, NPCs. The browser does the parsing; `server.js` only serves the last complete save at `/mapa/mundo.wld`, re-checked every minute (`world-snapshot.js` rejects half-written files).
+`/map/` is a self-hosted build of [TerraMap Web](https://github.com/TerraMap/terramap.github.io) (MIT) that opens the server's world on its own: pan, zoom, ore and chest search, NPCs. The browser does the parsing; `server.js` serves the save at `/map/mundo.wld`, re-checked every minute (`world-snapshot.js` rejects half-written files).
 
 The build is git-ignored. After a fresh clone, or to update TerraMap (bump `TERRAMAP_COMMIT`):
 
 ```bash
+# Windows:
+powershell -ExecutionPolicy Bypass -File tools/terramap/build.ps1
+
+# Linux / macOS:
 bash tools/terramap/build.sh   # needs git and Node >= 20
-npm test                       # world-file checks
 ```
 
-`tools/terramap/serve-our-world.patch` holds our changes: auto-load the server world, pt-BR and dark by default, link back to the status page, no upstream ads or analytics. TerraMap reads only the `.wld`, so blocks from mods (stored in the `.twld`) do not appear.
+`tools/terramap/serve-our-world.patch` holds our changes: auto-load the server world, English and dark by default, link back to the status page, no upstream ads or analytics. TerraMap reads only the `.wld`, so blocks from mods (stored in the `.twld`) do not appear.
 
 ## Security notes
 
